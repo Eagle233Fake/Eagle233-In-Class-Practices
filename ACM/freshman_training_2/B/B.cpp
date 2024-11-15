@@ -29,7 +29,7 @@ int main(void)
         }
     }
 
-    point p[0][0].ways = 1;
+    p[0][0].ways = 1;
 
     for (int i = 0; i < n; i++)
     {
