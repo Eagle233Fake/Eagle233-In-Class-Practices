@@ -1,0 +1,22 @@
+      Lab1_datalab 实验说明
+
+提交内容：
+1、完善后的bits.c  (程序代码 + 注释中包含解题思路)
+2、跑分截图（含完整的终端窗口、跑分命令、跑分结果。  文件名： 学号-姓名-lab1.png/jpg等。）
+
+
+实验过程：
+
+1、压缩包 datalab-handout.tar 在 linux 下解压。
+unix> tar xvf datalab-handout.tar
+
+本实验在解压得到的 datalab-handout 文件夹中进行。
+
+2、按照所附文档要求完善 bits.c (Writeup.pdf 最为详细)。
+
+  完善了其中的若干C函数后，随时可利用 driver.pl 等工具跑分。
+  unix> ./driver.pl
+
+  或者看 Writeup.pdf 的 5.Evaluation： 可以先使用 btest、dlc 等工具对单个C函数进行测试和评分，最后使用 driver.pl 工具进行总评。
+
+3、提交 bits.c 和跑分截图。

@@ -1,0 +1,12 @@
+提交内容：
+  实验报告文件名： 学号-姓名-lab2.pdf/docx 
+  报告内容： 所有phase的汇总，各phase的书写格式参见本目录中第一关的两个example（每个phase包括： 汇编代码 + 分析过程 + 运行的结果截图）
+
+参考过程（详见所附文档）：
+1、压缩包bomb.tar在linux下解压。以下操作在解压得到的bomb文件夹中进行。
+2、使用objdump得到bomb的反汇编版本。（得到的assembly.S汇编代码是本实验所需要阅读的代码。）
+  $ objdump -d bomb > bomb_assembly.S
+3、使用gdb进行调试。（gdb调试工具的基本用法可见本目录下的gdbnotes-x86-64.pdf、教材 3.10.2等）
+  $ gdb bomb
+4、完成各phase任务。（lab2PPT.pptx 的最后几页已经给出了 phase 1 即第一关的解决过程）
+5、提交报告。
