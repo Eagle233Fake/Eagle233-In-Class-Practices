@@ -18,5 +18,5 @@ int main(void) {
         }
     }
 
-    cout << dp[m] << endl;;
+    cout << dp[m] << endl;
 }
