@@ -1,7 +1,7 @@
 /* 
  * CS:APP Data Lab 
  * 
- * <Please put your name and userid here>
+ * 陈睿 10245101560
  * 
  * bits.c - Source file with your solutions to the Lab.
  *          This is the file you will hand in to your instructor.
@@ -139,7 +139,7 @@ NOTES:
  *   Rating: 1
  */
 int bitAnd(int x, int y) {
-  return 2;
+  return ~(~x | ~y);
 }
 /* 
  * getByte - Extract byte n from word x
@@ -150,15 +150,8 @@ int bitAnd(int x, int y) {
  *   Rating: 2
  */
 int getByte(int x, int n) {
-
-
-
-
-
-
-
-  return 2;
-
+  int a = 0xff;
+  return (x >> (n << 3)) & a;
 }
 /* 
  * logicalShift - shift x to the right by n, using a logical shift
@@ -169,7 +162,8 @@ int getByte(int x, int n) {
  *   Rating: 3 
  */
 int logicalShift(int x, int n) {
-  return 2;
+  int a = (1 << (31 + ~n + 1) << 1) + (1 << 31 >> 31);
+  return (x >> n) & a;
 }
 /*
  * bitCount - returns count of number of 1's in word
@@ -189,7 +183,10 @@ int bitCount(int x) {
  *   Rating: 4 
  */
 int bang(int x) {
-  return 2;
+  int isNeg = (x >> 31) & 1;
+  int cvt = ~x + 1;
+  int isCvtNeg = (cvt >> 31) & 1;
+  return ~(isNeg | isCvtNeg) + 2;
 }
 /* 
  * tmin - return minimum two's complement integer 
@@ -198,7 +195,7 @@ int bang(int x) {
  *   Rating: 1
  */
 int tmin(void) {
-  return 2;
+  return 1 << 31;
 }
 /* 
  * fitsBits - return 1 if x can be represented as an 
@@ -210,7 +207,9 @@ int tmin(void) {
  *   Rating: 2
  */
 int fitsBits(int x, int n) {
-  return 2;
+  int a = 31 + ~n + 1;
+  return !((x << a << 1 >> a >> 1) ^ x);
+  // 没问题吧？感觉样例有问题
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
@@ -221,7 +220,10 @@ int fitsBits(int x, int n) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-    return 2;
+  int negMask = x >> 31;
+  int cvt = ~x + 1;
+  int div = ((cvt & negMask) | (x & !negMask)) >> n;
+  return ((~div + 1) & negMask) | (div & !negMask);
 }
 /* 
  * negate - return -x 
@@ -231,7 +233,7 @@ int divpwr2(int x, int n) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+  return ~x + 1;
 }
 /* 
  * isPositive - return 1 if x > 0, return 0 otherwise 
@@ -241,7 +243,7 @@ int negate(int x) {
  *   Rating: 3
  */
 int isPositive(int x) {
-  return 2;
+  return !(x >> 31) & !!x;
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
@@ -251,7 +253,8 @@ int isPositive(int x) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  return 2;
+  int c = y + (~x + 1);
+  return !(c >> 31);
 }
 /*
  * ilog2 - return floor(log base 2 of x), where x > 0

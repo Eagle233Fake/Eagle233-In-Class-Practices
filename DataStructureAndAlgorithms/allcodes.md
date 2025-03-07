@@ -248,3 +248,252 @@ int main(void) {
 ```
 
 ## Week 2 https://voj.mobi/contest/335 20250228
+
+### A 打印锯齿矩阵（STL）
+
+```cpp
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main(void) {
+    int n, m;
+    cin >> n >> m;
+    vector<vector<int>> v(n);
+    for (int i = 0; i < m; i++) {
+        int a, b;
+        cin >> a >> b;
+        v[a - 1].push_back(b);
+    }
+
+    for (int i = 0; i < n; i++) {
+        if (v[i].size() == 0) {
+            cout << " " << endl;
+            continue;
+        }
+
+        for (int j = 0; j < v[i].size(); j++) {
+            cout << v[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+```
+
+### C 计算集合的并集（STL）
+
+```cpp
+#include <bits/stdc++.h>
+
+using namespace std;
+
+bool search(vector<int> v, int target) {
+    for (int i = 0; i < v.size(); i++) {
+        if (v[i] == target) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+int main(void) {
+    int n, m;
+    cin >> n >> m;
+    vector<int> v1(n);
+    vector<int> v2(m);
+
+    for (int i = 0; i < n; i++) {
+        cin >> v1[i];
+    }
+    for (int i = 0; i < m; i++) {
+        cin >> v2[i];
+    }
+
+    for (int i = 0; i < m; i++) {
+        if (search(v1, v2[i])) {
+            continue;
+        } else {
+            v1.push_back(v2[i]);
+        }
+    }
+
+    sort(v1.begin(), v1.end());
+    for (int i = 0; i < v1.size(); i++) {
+        cout << v1[i] << " ";
+    }
+    cout << endl;
+}
+```
+
+### D 小明学英语（STL）
+
+```cpp
+#include <bits/stdc++.h>
+
+using namespace std;
+
+bool search(vector<string> v, string target) {
+    for (int i = 0; i < v.size(); i++) {
+        if (v[i] == target) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int main(void) {
+    int n;
+    cin >> n;
+    vector<string> v1;
+
+    for (int i = 0; i < n; i++) {
+        int status;
+        cin >> status;
+        if (status == 0) {
+            string name;
+            cin >> name;
+            transform(name.begin(), name.end(), name.begin(), ::tolower); // 转为小写
+            v1.push_back(name);
+        } else {
+            string name;
+            cin >> name;
+            transform(name.begin(), name.end(), name.begin(), ::tolower); 
+            if (search(v1, name)) {
+                cout << "Yes" << endl;
+            } else {
+                cout << "No" << endl;
+            }
+        }
+    }
+}
+```
+
+### J islands 打炉石传说（二进制枚举）
+
+```cpp
+#include <bits/stdc++.h>
+
+using namespace std;
+
+struct Card {
+    int cost;
+    bool d;
+    int w;
+};
+
+int main(void) {
+    int n;
+    cin >> n;
+
+    Card cards[n];
+    for (int i = 0; i < n; i++) {
+        cin >> cards[i].cost >> cards[i].d >> cards[i].w;
+    }
+
+    vector<int> dp(11, 0); // i点法力值时的最大攻击力
+    for (int i = 0; i < n; i++) {
+        if (!cards[i].d) {
+            for (int j = 10; j >= cards[i].cost; j--) {
+                dp[j] = max(dp[j], dp[j - cards[i].cost] + cards[i].w);
+            }
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        if (cards[i].d) {
+            for (int j = 10; j >= cards[i].cost; j--) {
+                dp[j] = max(dp[j], dp[j - cards[i].cost] + cards[i].w);
+            }
+        }
+    }
+
+    int max = INT_MIN;
+    for (int i = 0; i < 11; i++) {
+        if (dp[i] > max) {
+            max = dp[i];
+        }
+    }
+
+    cout << max << endl;
+}
+```
+
+### Q 算法提高 选择排序
+
+```cpp
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main(void) {
+    int n;
+    cin >> n;
+    vector<int> v(n);
+    for (int i = 0; i < n; i++) {
+        cin >> v[i];
+    }
+
+    bool sorted = false;
+    int index = 0;
+    while (!sorted) {
+        int a = v[index];
+        int minNum = INT_MAX;
+        int minIndex;
+        for (int i = index; i < n; i++) {
+            if (v[i] < minNum) {
+                minNum = v[i];
+                minIndex = i;
+            }
+        }
+        if (minNum == a) {
+            cout << "swap(a[" << index << "], a[" << index << "]):";
+            for (int i = 0; i < n; i++) {
+                cout << v[i] << " ";
+            }
+            cout << endl;
+            index++;
+        } else {
+            swap(v[index], v[minIndex]);
+            cout << "swap(a[" << index << "], a[" << minIndex << "]):";
+            for (int i = 0; i < n; i++) {
+                cout << v[i] << " ";
+            }
+            cout << endl;
+            index++;
+        }
+        if (index == n) {
+            sorted = true;
+        }
+    }
+}
+```
+
+### R 得到整数 X
+
+```cpp
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main(void) {
+    int n, m;
+    cin >> n >> m;
+    vector<int> v(n);
+    for (int i = 0; i < n; i++) {
+        cin >> v[i];
+    }
+
+    vector<int> dp(m + 1, 0);
+    dp[0] = 1;
+    for (int i = 0; i < n; i++) {
+        for (int j = m; j >= v[i]; j--) {
+            dp[j] += dp[j - v[i]];
+        }
+    }
+
+    cout << dp[m] << endl;
+}
+```
+
+## Week 3
