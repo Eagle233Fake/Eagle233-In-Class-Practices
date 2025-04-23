@@ -1,7 +1,7 @@
 /* 
  * CS:APP Data Lab 
  * 
- * 陈睿 10245101560
+ * 
  * 
  * bits.c - Source file with your solutions to the Lab.
  *          This is the file you will hand in to your instructor.
@@ -139,8 +139,9 @@ NOTES:
  *   Rating: 1
  */
 int bitAnd(int x, int y) {
-  return ~(~x | ~y);
+  return ~(~x | ~y); // 德摩根律
 }
+
 /* 
  * getByte - Extract byte n from word x
  *   Bytes numbered from 0 (LSB) to 3 (MSB)
@@ -150,9 +151,10 @@ int bitAnd(int x, int y) {
  *   Rating: 2
  */
 int getByte(int x, int n) {
-  int a = 0xff;
-  return (x >> (n << 3)) & a;
+  int a = 0xff; // 0xff 用于掩码操作，提取一个字节
+  return (x >> (n << 3)) & a; // 将x右移n*8位，然后与0xff进行与操作，提取第n个字节
 }
+
 /* 
  * logicalShift - shift x to the right by n, using a logical shift
  *   Can assume that 0 <= n <= 31
@@ -162,9 +164,10 @@ int getByte(int x, int n) {
  *   Rating: 3 
  */
 int logicalShift(int x, int n) {
-  int a = (1 << (31 + ~n + 1) << 1) + (1 << 31 >> 31);
-  return (x >> n) & a;
+  int a = (1 << (31 + ~n + 1) << 1) + (1 << 31 >> 31); // 创建一个掩码，用于清除符号位
+  return (x >> n) & a; // 右移n位后与掩码进行与操作，确保符号位为0
 }
+
 /*
  * bitCount - returns count of number of 1's in word
  *   Examples: bitCount(5) = 2, bitCount(7) = 3
@@ -173,8 +176,29 @@ int logicalShift(int x, int n) {
  *   Rating: 4
  */
 int bitCount(int x) {
-  return 2;
+  int a = 0x55;
+  int b = 0x33;
+  int c = 0xf;
+  int d = 0xff;
+  int e = ~(1 << 31 >> 15); // 00000000000000001111111111111111
+  int cvt;
+
+  a += a << 8;
+  a += a << 16; // 01010101010101010101010101010101
+  b += b << 8;
+  b += b << 16; // 00110011001100110011001100110011
+  c += c << 8;
+  c += c << 16; // 00001111000011110000111100001111
+  d += d << 16; // 00000000111111110000000011111111
+
+  cvt = (x & a) + ((x >> 1) & a); // 计算每两位中1的个数
+  cvt = (cvt & b) + ((cvt >> 2) & b); // 计算每四位中1的个数
+  cvt = (cvt & c) + ((cvt >> 4) & c); // 计算每八位中1的个数
+  cvt = (cvt & d) + ((cvt >> 8) & d); // 计算每十六位中1的个数
+  cvt = (cvt & e) + ((cvt >> 16) & e); // 计算整个32位中1的个数
+  return cvt;
 }
+
 /* 
  * bang - Compute !x without using !
  *   Examples: bang(3) = 0, bang(0) = 1
@@ -183,11 +207,12 @@ int bitCount(int x) {
  *   Rating: 4 
  */
 int bang(int x) {
-  int isNeg = (x >> 31) & 1;
-  int cvt = ~x + 1;
-  int isCvtNeg = (cvt >> 31) & 1;
-  return ~(isNeg | isCvtNeg) + 2;
+  int isNeg = (x >> 31) & 1; // 判断x是否为负数
+  int cvt = ~x + 1; // 取反加1，得到-x
+  int isCvtNeg = (cvt >> 31) & 1; // 判断-x是否为负数
+  return ~(isNeg | isCvtNeg) + 2; // 如果x为0，则返回1，否则返回0
 }
+
 /* 
  * tmin - return minimum two's complement integer 
  *   Legal ops: ! ~ & ^ | + << >>
@@ -195,8 +220,9 @@ int bang(int x) {
  *   Rating: 1
  */
 int tmin(void) {
-  return 1 << 31;
+  return 1 << 31; // 返回最小的32位有符号整数，即-2147483648
 }
+
 /* 
  * fitsBits - return 1 if x can be represented as an 
  *  n-bit, two's complement integer.
@@ -207,10 +233,10 @@ int tmin(void) {
  *   Rating: 2
  */
 int fitsBits(int x, int n) {
-  int a = 31 + ~n + 1;
-  return !((x << a << 1 >> a >> 1) ^ x);
-  // 没问题吧？感觉样例有问题
+  int a = 31 + ~n + 1; // 计算32 - n
+  return !((x << a << 1 >> a >> 1) ^ x); // 检查x是否可以用n位表示
 }
+
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
  *  Round toward zero
@@ -220,11 +246,10 @@ int fitsBits(int x, int n) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-  int negMask = x >> 31;
-  int cvt = ~x + 1;
-  int div = ((cvt & negMask) | (x & !negMask)) >> n;
-  return ((~div + 1) & negMask) | (div & !negMask);
+  int bias = (x >> 31) & ~(1 << 31 >> 31 << n); // 偏置 2 ^ n - 1
+  return (x + bias) >> n; // 将x加上偏置后右移n位，实现向零舍入的除法
 }
+
 /* 
  * negate - return -x 
  *   Example: negate(1) = -1.
@@ -233,8 +258,9 @@ int divpwr2(int x, int n) {
  *   Rating: 2
  */
 int negate(int x) {
-  return ~x + 1;
+  return ~x + 1; // 取反加1，得到-x
 }
+
 /* 
  * isPositive - return 1 if x > 0, return 0 otherwise 
  *   Example: isPositive(-1) = 0.
@@ -243,8 +269,9 @@ int negate(int x) {
  *   Rating: 3
  */
 int isPositive(int x) {
-  return !(x >> 31) & !!x;
+  return !(x >> 31) & !!x; // 判断x是否为正数
 }
+
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
  *   Example: isLessOrEqual(4,5) = 1.
@@ -253,9 +280,10 @@ int isPositive(int x) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  int c = y + (~x + 1);
-  return !(c >> 31);
+  int c = y + (~x + 1); // 计算y - x
+  return !(c >> 31); // 如果y - x >= 0，则返回1，否则返回0
 }
+
 /*
  * ilog2 - return floor(log base 2 of x), where x > 0
  *   Example: ilog2(16) = 4
@@ -264,8 +292,15 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 4
  */
 int ilog2(int x) {
-  return 2;
+  int result = 0;
+  result += (!!(x >> 16)) << 4; // if x > 16 bits, add 16.
+  result += (!!(x >> (8 + result))) << 3; // if x > 8 bits, add 8...
+  result += (!!(x >> (4 + result))) << 2;
+  result += (!!(x >> (2 + result))) << 1;
+  result += (!!(x >> (1 + result)));
+  return result; // 通过二分法逐步缩小范围，找到x的最高有效位
 }
+
 /* 
  * float_neg - Return bit-level equivalent of expression -f for
  *   floating point argument f.
@@ -278,8 +313,15 @@ int ilog2(int x) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
- return 2;
+  int mask = 1 << 31;
+  int e = (uf >> 23);
+  int f = uf ^ (e << 23);
+  if ((e & 0xff) == 0xff && f != 0) {
+    return uf; // 如果uf是NaN，则返回uf
+  }
+  return uf ^ mask; // 否则，翻转符号位
 }
+
 /* 
  * float_i2f - Return bit-level equivalent of expression (float) x
  *   Result is returned as unsigned int, but
@@ -290,8 +332,32 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
-  return 2;
+  int sign = x & (1 << 31);
+  int minus = 1 << 31; 
+  int exp = 31;
+  int bias = 127;
+  int frac;
+  if (!x) {
+    return 0; // 如果x为0，则返回0
+  }
+  if (x == minus) {
+    return minus | ((exp + bias) << 23); // 如果x是最小的负数，则返回对应的浮点数表示
+  }
+  if (sign) {
+    x = ~x + 1; // 如果x为负数，则取其绝对值
+  }
+  while (!(x & minus))
+  {
+     x <<= 1;
+     exp -= 1; // 找到x的最高有效位
+  }
+  frac = (((~minus) & x) >> 8); // 提取尾数部分
+  if (x & 0x80 && ((frac & 1) ||((x & 0x7f) > 0))) {
+    frac++; // 进行舍入处理
+  }
+  return sign + ((exp + bias) << 23) + frac; // 返回浮点数的二进制表示
 }
+
 /* 
  * float_twice - Return bit-level equivalent of expression 2*f for
  *   floating point argument f.
@@ -304,5 +370,16 @@ unsigned float_i2f(int x) {
  *   Rating: 4
  */
 unsigned float_twice(unsigned uf) {
-  return 2;
+  // inf or N/A
+  if (((uf >> 23) & 0xff) == 0xff) { 
+    return uf; // 如果uf是无穷大或NaN，则返回uf
+  }
+
+  // normalized
+  if (((uf >> 23) & 0xff) != 0) {
+    return uf + (1 << 23); // 如果uf是规格化数，则指数加1
+  }
+
+  // denormalized
+  return (uf & (1 << 31)) | (uf << 1); // 如果uf是非规格化数，则尾数左移1位
 }
