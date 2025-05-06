@@ -1,0 +1,28 @@
+提交：：
+1、完善后的 csim.c 和 trans.c 文件
+2、实验报告：
+    内容包括：跑分截图，实验分析过程、算法设计等的描述、
+
+实验报告文件名：
+学号-姓名-lab4.pdf/docx 
+
+其它：
+1、压缩包 cachelab-handout.tar在linux下解压
+2、详见所附文档 README、lab4-cachelab.pptx、Writeup.pdf等
+3、需要安装 valgrind 工具，见所附安装指南。
+
+
+# 以下的实验跑分过程，摘自cachelab-handout.tar中的README：
+
+Before running the autograders, compile your code:
+    linux> make
+
+Check the correctness of your simulator:
+    linux> ./test-csim
+
+Check the correctness and performance of your transpose functions:
+    linux> ./test-trans -M 32 -N 32
+    linux> ./test-trans -M 64 -N 64
+    linux> ./test-trans -M 61 -N 67
+
+    

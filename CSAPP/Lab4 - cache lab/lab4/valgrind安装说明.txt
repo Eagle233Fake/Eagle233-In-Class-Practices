@@ -1,0 +1,52 @@
+安装方法有两种，同学们自选一种即可，
+已经更换apt源的同学推荐使用方法2，未更换apt源的同学推荐使用方法1
+
+## 方法1  
+解压安装包，编译并安装，方法如下
+
+0. 安装 tar 和 bzip2 工具
+sudo apt-get install tar bzip2
+
+1.解压valgrind压缩包
+tar -jxvf valgrind-3.19.0.tar.bz2
+
+2.进入valgrind目录
+cd valgrind-3.19.0
+
+3.初始化配置
+./configure
+
+4.编译并安装 (时间较长。。)
+make
+sudo make install
+
+
+5.检查是否安装成功
+valgrind –h
+显示valgrind的参数及提示，说明安装成功
+
+
+（## 方法2）  
+直接使用apt命令进行安装，但是Ubuntu自带的源下载速度很慢，使用这种方法需要更换apt源，已经更换过的同学直接执行命令即可，没有更换源的同学需要按照下面更换源的链接操作后再执行命令
+
+安装命令：
+sudo apt-get install valgrind
+
+检查安装是否成功：
+valgrind –h
+显示valgrind的参数及提示，说明安装成功
+
+更换apt源参考链接
+https://blog.csdn.net/Hester1999/article/details/108579904
+
+
+
+valgrind使用与安装参考链接
+https://blog.csdn.net/justheretobe/article/details/52986461
+
+
+
+
+
+
+
