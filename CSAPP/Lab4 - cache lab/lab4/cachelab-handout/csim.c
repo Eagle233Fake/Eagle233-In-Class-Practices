@@ -1,10 +1,22 @@
 #include "cachelab.h"
 #include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <inttypes.h>
+#include <stdio.h>
+#include <getopt.h>
 
-typedef struct {
+#define fileNameLength 1000
+
+uint64_t hits = 0;
+uint64_t misses = 0;
+uint64_t evictions = 0;
+
+typedef struct { 
     int valid;
-    unsigned long long tag;
-    int lru;
+    uint64_t tag;
+    uint64_t lru;
 } Line;
 
 typedef struct {
@@ -13,17 +25,20 @@ typedef struct {
 
 typedef struct {
     Set *sets;
-    int s, E, b;
+    uint64_t s;
+    uint64_t E;
+    uint64_t b;
 } Cache;
 
-Cache initCache(int s, int E) {
+Cache initCache(uint64_t s, uint64_t E, uint64_t b) {
     int S = 1 << s;
-    Cache cache;
 
+    Cache cache;
     cache.s = s;
     cache.E = E;
-    cache.sets = (Set *)malloc(S * sizeof(Set));
+    cache.b = b;
 
+    cache.sets = (Set *)malloc(S * sizeof(Set));
     for (int i = 0; i < S; i++) {
         cache.sets[i].lines = (Line *)malloc(E * sizeof(Line));
         for (int j = 0; j < E; j++) {
@@ -36,64 +51,115 @@ Cache initCache(int s, int E) {
     return cache;
 }
 
-Cache cache = initCache(s, E);
+void accessCache(Cache *cache, uint64_t address) {
+    uint64_t s = cache->s;
+    uint64_t b = cache->b;
 
-void freeCache(void) {
-    int S = 1 << cache.s;
-    for (int i = 0; i < S; i++) {
-        free(cache.sets[i].lines);
-    }
-    free(cache.sets);
-}
+    uint64_t tag = address >> (s + b);
 
-void loadFile(char *tracefile) {
-    FILE *fp = fopen(tracefile, "r");
-    char operation;
-    unsigned long long address;
-    int size;
+    uint64_t mask = UINT64_MAX;
+    mask >>= 64 - (s + b);
+    uint64_t temp = address & mask;
 
-    // L 10,4 
-    while (fscanf(fp, " %c %llx,%d", &operation, &address, &size) == 3) {
-        if (operation == 'L' || operation == 'S') {
-            access(address);
-        } else if (operation == 'M') {
-            access(address);
-            access(address);
+    uint64_t index = temp >> b;
+
+    int isEmpty = 0;
+    for (int i = 0; i < cache->E; i++) {
+        if (cache->sets[index].lines[i].valid && cache->sets[index].lines[i].tag == tag) {
+            cache->sets[index].lines[i].lru = 0;
+            hits++;
+            return;
         }
-        updateLRU();
+
+        if (cache->sets[index].lines[i].valid == 0) {
+            isEmpty = 1;
+        }
     }
 
-    fclose(fp);
-}
+    if (isEmpty) {
+        for (int i = 0; i < cache->E; i++) {
+            if (cache->sets[index].lines[i].valid == 0) {
+                cache->sets[index].lines[i].valid = 1;
+                cache->sets[index].lines[i].tag = tag;
+                misses++;
+                return;
+            }
+        }
+    } else {
+        uint64_t MaxLRU = 0;
+        for (int i = 0; i < cache->E; i++) {
+            MaxLRU = cache->sets[index].lines[i].lru > MaxLRU ? cache->sets[index].lines[i].lru : MaxLRU;
+        }
 
-void access(unsigned long long address) {
-    int s = cache.s;
-    int b = cache.b;
-    unsigned long long tag = address >> (b + s);
-    unsigned long long mask = -1;
-    
-}
-
-void updateLRU(void) {
-    for (int i = 0; i < (1 << cache.s); i++) {
-        for (int j = 0; j < cache.E; j++) {
-            if (cache.sets[i].lines[j].valid) {
-                cache.sets[i].lines[j].lru++;
+        for (int i = 0; i < cache->E; i++) {
+            if (MaxLRU == cache->sets[index].lines[i].lru) {
+                cache->sets[index].lines[i].lru = 0;
+                cache->sets[index].lines[i].tag = tag;
+                misses++;
+                evictions++;
+                return;
             }
         }
     }
 }
 
-void access()
+void updateLRU(Cache *cache) {
+    int S = 1 << cache->s;
+    int E = cache->E;
+
+    for (int i = 0; i < S; i++) {
+        for (int j = 0; j < E; j++) {
+            if (cache->sets[i].lines[j].valid) {
+                cache->sets[i].lines[j].lru++;
+            }
+        }
+    }
+}
+
+void getFileInfo(char *tracefile, Cache *cache) {
+    FILE *fp = fopen(tracefile, "r");
+    if (fp == NULL) {
+        return;
+    }
+
+    char opt;
+    uint64_t address;
+    int size;
+
+    while (fscanf(fp, " %c %" SCNx64 ",%d", &opt, &address, &size) == 3) {
+        switch (opt) {
+            case 'L':
+                accessCache(cache, address);
+                break;
+            case 'S':
+                accessCache(cache, address);
+                break;
+            case 'M':
+                accessCache(cache, address);
+                accessCache(cache, address);
+                break;
+        }
+        updateLRU(cache);
+    }
+}
+
+void freeCache(Cache *cache) {
+    int S = 1 << cache->s;
+    for (int i = 0; i < S; i++) {
+        free(cache->sets[i].lines);
+    }
+    free(cache->sets);
+}
 
 int main(int argc, char *argv[]) {
-    int s = 0, E = 0, b = 0;
-    char *tracefile = NULL;
-    char op;
+    uint64_t s;
+    uint64_t E;
+    uint64_t b;
+    char tracefile[fileNameLength];
 
-    // ./csim-ref -s 4 -E 1 -b 4 -t traces/yi.trace
-    while ((op = getopt(argc, argv, "s:E:b:t:")) != -1) {
-        switch (op) {
+    char opt;
+    while ((opt = getopt(argc, argv, "s:E:b:t:")) != -1) {
+        switch (opt) {
             case 's':
                 s = atoi(optarg);
                 break;
@@ -109,13 +175,12 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    Cache cache = initCache(s, E);
+    Cache cache;
+    cache = initCache(s, E, b);
 
-    loadFile(tracefile);
-    
-    freeCache();
+    getFileInfo(tracefile, &cache);
 
-    printSummary(hit_count, miss_count, eviction_count);
-    
-    return 0;
+    freeCache(&cache);
+
+    printSummary(hits, misses, evictions);
 }
