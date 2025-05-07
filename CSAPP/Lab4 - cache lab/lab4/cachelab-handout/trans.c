@@ -20,8 +20,107 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
  *     be graded. 
  */
 char transpose_submit_desc[] = "Transpose submission";
-void transpose_submit(int M, int N, int A[N][M], int B[M][N])
-{
+void transpose_submit(int M, int N, int A[N][M], int B[M][N]) {
+    if (M == 32) {
+        int i, j, k, l;
+        int temp1, temp2, temp3, temp4, temp5, temp6, temp7, temp8;
+        for (k = 0; k < M; k += 8) {
+            for (l = 0; l < M; l += 8) {
+                if (k == l) {
+                    for (i = k; i < k + 8; i++) {
+                        temp1 = A[i][l];
+                        temp2 = A[i][l + 1];
+                        temp3 = A[i][l + 2];
+                        temp4 = A[i][l + 3];
+                        temp5 = A[i][l + 4];
+                        temp6 = A[i][l + 5];
+                        temp7 = A[i][l + 6];
+                        temp8 = A[i][l + 7];
+
+                        B[l][i] = temp1;
+                        B[l + 1][i] = temp2;
+                        B[l + 2][i] = temp3;
+                        B[l + 3][i] = temp4;
+                        B[l + 4][i] = temp5;
+                        B[l + 5][i] = temp6;
+                        B[l + 6][i] = temp7;
+                        B[l + 7][i] = temp8;
+                    }
+                } else {
+                    for (i = k; i < k + 8; i++) {
+                        for (j = l; j < l + 8; j++) {
+                            B[j][i] = A[i][j];
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (M == 64) {
+        for (int i = 0; i < N; i += 8) {
+            for (int j = 0; j < M; j += 8) {
+                for (int k = i; k < i + 4; ++k) {
+                    int temp0 = A[k][j];
+                    int temp1 = A[k][j + 1];
+                    int temp2 = A[k][j + 2];
+                    int temp3 = A[k][j + 3];
+                    int temp4 = A[k][j + 4];
+                    int temp5 = A[k][j + 5];
+                    int temp6 = A[k][j + 6];
+                    int temp7 = A[k][j + 7];
+    
+                    B[j][k]     = temp0;
+                    B[j + 1][k] = temp1;
+                    B[j + 2][k] = temp2;
+                    B[j + 3][k] = temp3;
+    
+                    B[j][k + 4]     = temp7;
+                    B[j + 1][k + 4] = temp6;
+                    B[j + 2][k + 4] = temp5;
+                    B[j + 3][k + 4] = temp4;
+                }
+    
+                for (int l = 0; l < 4; ++l) {
+                    int temp0 = A[i + 4][j + 3 - l];
+                    int temp1 = A[i + 5][j + 3 - l];
+                    int temp2 = A[i + 6][j + 3 - l];
+                    int temp3 = A[i + 7][j + 3 - l];
+                    int temp4 = A[i + 4][j + 4 + l];
+                    int temp5 = A[i + 5][j + 4 + l];
+                    int temp6 = A[i + 6][j + 4 + l];
+                    int temp7 = A[i + 7][j + 4 + l];
+    
+                    B[j + 4 + l][i]     = B[j + 3 - l][i + 4];
+                    B[j + 4 + l][i + 1] = B[j + 3 - l][i + 5];
+                    B[j + 4 + l][i + 2] = B[j + 3 - l][i + 6];
+                    B[j + 4 + l][i + 3] = B[j + 3 - l][i + 7];
+    
+                    B[j + 3 - l][i + 4] = temp0;
+                    B[j + 3 - l][i + 5] = temp1;
+                    B[j + 3 - l][i + 6] = temp2;
+                    B[j + 3 - l][i + 7] = temp3;
+    
+                    B[j + 4 + l][i + 4] = temp4;
+                    B[j + 4 + l][i + 5] = temp5;
+                    B[j + 4 + l][i + 6] = temp6;
+                    B[j + 4 + l][i + 7] = temp7;
+                }
+            }
+        }
+    }    
+
+    if (M == 61) {
+        for (int i = 0; i < N; i += 16) {
+            for (int j = 0; j < M; j += 16) {
+                for (int k = i; k < i + 16 && k < N; k++) {
+                    for (int l = j; l < j + 16 && l < M; l++) {
+                        B[l][k] = A[k][l];
+                    }
+                }
+            }
+        }
+    }
 }
 
 /* 
