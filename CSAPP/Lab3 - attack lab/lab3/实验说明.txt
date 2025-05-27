@@ -1,0 +1,18 @@
+提交内容：
+  实验报告 -- 学号-姓名-lab3.pdf/docx 
+
+报告内容：
+  所有任务的汇总（每个任务的分析过程 + 结果攻击序列 + 跑通的运行截图）
+
+其它（详见所附文档）：
+1、压缩包target1.tar在linux下解压。
+2、完成任务1~5 （说明详见lab3PPT.pptx、Writeup.pdf等）
+-- 使用gdb查看或调试ctarget和rtarget中的相关函数，也可用objdump反汇编。通过分析，依次设计出针对五个任务的攻击序列的字符文件,例如 p1.txt ~ p5.txt.
+-- 使用hex2raw，将字符文件转换成字节码文件：
+       例如： ./hex2raw < p1.txt > p1
+-- 运行：
+   对于任务1~3，采用ctarget执行 (注意加 -qi)
+      例如： ./ctarget -qi p1
+   对于任务4~5，采用rtarget执行 (注意加 -qi)
+      例如： ./rtarget -qi p4
+3、完成及提交报告。
